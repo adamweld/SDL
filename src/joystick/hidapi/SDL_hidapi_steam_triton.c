@@ -646,6 +646,13 @@ static bool HIDAPI_DriverSteamTriton_SendJoystickEffect(SDL_HIDAPI_Device *devic
         }
         return true;
     }
+    if (size == HID_RUMBLE_OUTPUT_REPORT_BYTES) {
+        int rc = SDL_hid_write(device->dev, data, size);
+        if (rc < 0) {
+            return false;
+        }
+        return true;
+    }
     return SDL_Unsupported();
 }
 
