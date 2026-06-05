@@ -2,7 +2,7 @@ name: Build patched SDL3
 
 on:
   push:
-    branches: [triton-sendeffect-output-reports]
+    branches: [triton-sendeffect-output-reports, triton-3.4.11]
   workflow_dispatch:
 
 jobs:
