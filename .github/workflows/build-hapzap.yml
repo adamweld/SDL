@@ -1,0 +1,53 @@
+name: Build patched SDL3
+
+on:
+  push:
+    branches: [triton-sendeffect-output-reports]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            lib: libSDL3.dylib
+            cmake_extra: ""
+          - os: ubuntu-latest
+            lib: libSDL3.so.0
+            cmake_extra: "-DSDL_X11=OFF -DSDL_WAYLAND=OFF -DSDL_UNIX_CONSOLE_BUILD=ON"
+          - os: windows-latest
+            lib: SDL3.dll
+            cmake_extra: ""
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DSDL_HIDAPI=ON
+          -DSDL_HIDAPI_JOYSTICK=ON
+          -DSDL_AUDIO=OFF
+          -DSDL_VIDEO=OFF
+          -DSDL_RENDER=OFF
+          -DSDL_GPU=OFF
+          -DSDL_CAMERA=OFF
+          -DSDL_TESTS=OFF
+          -DSDL_TEST_LIBRARY=OFF
+          ${{ matrix.cmake_extra }}
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Upload library
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdl3-${{ runner.os }}
+          path: |
+            build/${{ matrix.lib }}
+            build/Release/${{ matrix.lib }}
+          if-no-files-found: error
